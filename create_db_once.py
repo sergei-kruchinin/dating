@@ -1,4 +1,10 @@
-# create_db_once.py
+"""
+Модуль: create_db_once
+
+Следует запустить перед первым запуском приложения для создания файла БД и создания таблиц.
+"""
+
+
 import asyncio
 
 from src.config.database import init_db

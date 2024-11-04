@@ -15,14 +15,14 @@ class UserModel(Base):
 
     Представляет таблицу `users` в базе данных, содержащую информацию о пользователе.
 
-    Атрибуты:
+    Attributes:
         id (int): Первичный ключ пользователя.
         avatar_url (str, optional): URL аватара пользователя.
         gender (str): Пол пользователя; может быть 'male' или 'female'.
         first_name (str): Имя пользователя.
         last_name (str): Фамилия пользователя.
         email (str): Уникальный адрес электронной почты пользователя.
-        hashed_password (str): Хешированный пароль для аутентификации.
+        hashed_password (str): Хэшированный пароль для аутентификации.
         is_active (bool): Флаг, отображающий активен ли пользователь; для soft delete.
     """
 
@@ -34,7 +34,7 @@ class UserModel(Base):
     first_name = Column(String, index=True, comment="Имя пользователя.")
     last_name = Column(String, index=True, comment="Фамилия пользователя.")
     email = Column(String, unique=True, index=True, comment="Уникальный адрес электронной почты пользователя.")
-    hashed_password = Column(String, comment="Хешированный пароль для аутентификации.")
+    hashed_password = Column(String, comment="Хэшированный пароль для аутентификации.")
     is_active = Column(Boolean, default=True,
                        comment="Флаг активности пользователя; используется для мягкого удаления.")
 
