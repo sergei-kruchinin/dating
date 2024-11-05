@@ -32,3 +32,12 @@ class UserNotFound(Exception):
 class DatabaseError(Exception):
     """Ошибка БД"""
     pass
+
+
+# Ошибки связанные с jwt-токеном
+class TokenExpired(Exception):
+    pass
+
+
+class TokenInvalid(Exception):
+    pass

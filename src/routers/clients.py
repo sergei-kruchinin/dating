@@ -6,41 +6,29 @@
 import asyncio
 import logging
 from typing import Union
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, status, Form
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from config.database import SessionLocal
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, status
+
 from config.settings import WATERMARK_PATH, AVATAR_URL_PREFIX
-
-from schemas.errors import (BadRequestResponse, InternalServerErrorResponse,
-                            NotFoundResponse, EmailAlreadyRegisteredResponse)
-from schemas.user import UserCreate, UserResponse
-from services.image_service import LocalImageService
-from services.password_hasher import PasswordHasher
-from services.watermark_service import WatermarkService
-from services.user_service import UserService
-from services.image_validation_service import ImageValidationService
-from models.user import UserModel
 from exceptions.exceptions import (UserNotFound, EmailAlreadyRegistered,
                                    FileProcessingError, FileValidationError,
                                    DatabaseError)
+from models.user import UserModel
+from schemas.errors import (BadRequestResponse, InternalServerErrorResponse,
+                            NotFoundResponse, EmailAlreadyRegisteredResponse)
+from schemas.token import TokenVerification
+from schemas.user import UserCreate, UserResponse
+from services.image_service import LocalImageService
+from services.image_validation_service import ImageValidationService
+from services.like_service import LikeService
+from services.user_service import UserService
+from services.watermark_service import WatermarkService
+from .dependencies import get_user_service, get_like_service, token_required
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
-
-
-async def get_db() -> AsyncSession:
-    """Создает и возвращает асинхронный сеанс работы с базой данных."""
-    async with SessionLocal() as session:
-        yield session
-
-
-async def get_user_service(db: AsyncSession = Depends(get_db)) -> UserService:
-    """Возвращает экземпляр UserService для управления пользователями."""
-    password_hasher = PasswordHasher()
-    return UserService(db, password_hasher)
 
 
 def get_watermark_service() -> WatermarkService:
@@ -230,6 +218,55 @@ async def get_user_by_id(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except Exception as e:
         logger.error(f"Непредвиденная ошибка: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An internal server error occurred.",
+        )
+
+
+@router.post(
+    "/{user_id}/match",
+    status_code=status.HTTP_201_CREATED,
+    summary="Лайк пользователя",
+    description="Позволяет лайкнуть пользователя",
+    responses={
+        status.HTTP_404_NOT_FOUND: {"description": "User not found."},
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {"description": "Internal Server Error."},
+    },
+)
+async def create_match(
+        user_id: int,
+        user_service: UserService = Depends(get_user_service),
+        like_service: LikeService = Depends(get_like_service),
+        verification: TokenVerification = Depends(token_required)
+):
+    matched_user_id = user_id
+    source_user_id = verification.id
+    logger.info(f"Attempting to create a match between user {source_user_id} and {matched_user_id}")
+    try:
+
+        # Ensure matched users exist
+        matched_user = await user_service.get_user_by_id(matched_user_id)
+
+        if source_user_id == matched_user_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A user cannot match themselves."
+            )
+        # if match
+
+        # Create a new match between users
+
+        await like_service.create_like(source_user_id, matched_user_id)
+
+        logger.info(f"Successfully created a match between {source_user_id} and {matched_user_id}")
+        return {"message": "Match created"}
+
+
+    except UserNotFound as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error creating match: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An internal server error occurred.",

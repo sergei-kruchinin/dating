@@ -40,7 +40,7 @@ def get_env_variable(name: str, default: str) -> str:
     Возвращает значение переменной окружения или значение по умолчанию.
 
     Args:
-        name (str): Имя переменной окружения.
+        name (str): Имя переменной окружения,
         default (str): Значение по умолчанию, если переменная окружения не определена.
 
     Returns:
@@ -52,13 +52,37 @@ def get_env_variable(name: str, default: str) -> str:
     logger.info(f"{name}: {value}")
     return value
 
+def get_env_variable_only_from_env(name: str) -> str:
+    """
+    Возвращает значение переменной окружения или значение по умолчанию.
+
+    Args:
+        name (str): Имя переменной окружения,
+        default (str): Значение по умолчанию, если переменная окружения не определена.
+
+    Returns:
+        str: Значение переменной окружения или значение по умолчанию.
+    """
+    value = os.getenv(name, '')
+    if value == '':
+        logger.error(f"{name} не задан в переменных окружения. ")
+    logger.info(f"{name}: set {value}")
+    return value
+
 
 # Загрузка конфигурационных переменных
 DATABASE_URL = get_env_variable('DATABASE_URL', f'sqlite+aiosqlite:///{BASE_DIR / "database.db"}')
-SECRET_KEY = get_env_variable('SECRET_KEY', 'default_secret_key')
+AUTH_SECRET = get_env_variable('AUTH_SECRET', 'default_secret_key')
+AUTH_EXPIRES_SECONDS = int(get_env_variable('AUTH_EXPIRES_SECONDS', '600'))  # 10 минут
+
 AVATAR_DIR = get_env_variable('AVATAR_DIR', str(BASE_DIR / 'avatars'))
 AVATAR_URL_PREFIX = get_env_variable('AVATAR_URL_PREFIX', 'avatars')
 WATERMARK_PATH = get_env_variable('WATERMARK_FILE', str(BASE_DIR / 'watermark.png'))
+
+
+# Без дефолтного значения для YANDEX_SMTP_SECRET
+YANDEX_SMTP_SECRET = get_env_variable('YANDEX_SMTP_SECRET', default='')
+YANDEX_EMAIL = get_env_variable('YANDEX_EMAIL', default='')
 
 # Обеспечение существования директории для аватаров
 avatar_path = Path(AVATAR_DIR)

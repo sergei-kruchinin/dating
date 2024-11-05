@@ -68,3 +68,15 @@ class EmailAlreadyRegisteredResponse(ErrorResponse):
         "Email уже зарегистрирован.",
         description="Стандартное сообщение для конфликтов из-за дублирования email."
     )
+
+
+class UnauthorizedResponse(ErrorResponse):
+    """
+    Сообщение об ошибке 401 Unauthorized
+    Attributes:
+        detail (str): Описание ошибки.
+    """
+    detail: str = Field(
+        "Пользователь не авторизован",
+        description="Стандартное сообщение для не верной авторизации"
+    )

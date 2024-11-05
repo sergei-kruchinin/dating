@@ -8,6 +8,7 @@
 
 from fastapi import FastAPI
 from routers.clients import router as users_router
+from routers.auth import router as auth_router
 from config.logging import setup_logging
 from exceptions.error_handlers import register_error_handlers
 
@@ -16,6 +17,7 @@ setup_logging()
 app = FastAPI()
 
 app.include_router(users_router, prefix="/api/clients")
+app.include_router(auth_router, prefix="/api/auth", tags=["auth"])
 # app.include_router(matches_router, prefix="/api/clients")
 # app.include_router(listings_router, prefix="/api")
 

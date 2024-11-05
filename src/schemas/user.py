@@ -6,8 +6,8 @@
 """
 
 from typing import Literal
-from fastapi import Form
 
+from fastapi import Form
 from pydantic import BaseModel, EmailStr, Field
 
 
@@ -48,8 +48,8 @@ class UserCreate(BaseModel):
     @classmethod
     def as_form(
             cls,
-            gender: Literal['male', 'female'] = Form(...,
-                                description="Пол пользователя, допустимые значения: 'male' или 'female'."),
+            gender: Literal['male', 'female'] = Form(..., description=("Пол пользователя, допустимые значения:"
+                                                                       "'male' или 'female'.")),
             first_name: str = Form(..., description="Имя пользователя."),
             last_name: str = Form(..., description="Фамилия пользователя."),
             email: EmailStr = Form(..., description="Электронная почта пользователя."),
@@ -63,7 +63,6 @@ class UserCreate(BaseModel):
             email=email,
             password=password
         )
-
 
 
 class UserResponse(BaseModel):

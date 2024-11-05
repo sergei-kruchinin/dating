@@ -6,7 +6,9 @@ from sqlalchemy import pool
 from alembic import context
 
 from models import Base
-from models.user import UserModel
+from models.user import UserModel  # type: ignore
+from models.like import LikeModel  # type: ignore
+
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
